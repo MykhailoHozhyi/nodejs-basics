@@ -1,8 +1,27 @@
-import createHttpError from "http-errors";
-import { createStudent, deleteStudent, getAllStudents, getStudentById, updateStudent } from "../services/students.js";
+import createHttpError from 'http-errors';
+import {
+  createStudent,
+  deleteStudent,
+  getAllStudents,
+  getStudentById,
+  updateStudent,
+} from '../services/students.js';
+import { parsePaginationParams } from '../utils/parsePaginationParams.js';
+import { parseSortParams } from '../utils/parseSortParams.js';
+import { parseFilterParams } from '../utils/parseFilterParams.js';
 
 export const getStudentsController = async (req, res) => {
-  const students = await getAllStudents();
+  const { page, perPage } = parsePaginationParams(req.query);
+  const { sortBy, sortOrder } = parseSortParams(req.query);
+  const filter = parseFilterParams(req.query);
+
+  const students = await getAllStudents({
+    page,
+    perPage,
+    sortBy,
+    sortOrder,
+    filter,
+  });
 
   res.status(200).json({
     status: 200,
@@ -37,7 +56,7 @@ export const createStudentController = async (req, res) => {
 };
 
 export const deleteStudentController = async (req, res) => {
-  const {studentId} = req.params;
+  const { studentId } = req.params;
 
   const student = await deleteStudent(studentId);
 
@@ -49,7 +68,7 @@ export const deleteStudentController = async (req, res) => {
 };
 
 export const upsertStudentController = async (req, res) => {
-  const {studentId} = req.params;
+  const { studentId } = req.params;
 
   const result = await updateStudent(studentId, req.body, {
     upsert: true,
@@ -69,7 +88,7 @@ export const upsertStudentController = async (req, res) => {
 };
 
 export const patchStudentController = async (req, res) => {
-  const {studentId} = req.params;
+  const { studentId } = req.params;
 
   const result = await updateStudent(studentId, req.body);
 
